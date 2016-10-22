@@ -581,11 +581,14 @@ void Servatrice_DatabaseInterface::unlockSessionTables()
     execSqlQuery(query);
 }
 
-void Servatrice_DatabaseInterface::increaseKickStat(const int playerID)
+void Servatrice_DatabaseInterface::increasePlayerStat(const int &playerID, const QString &stat)
 {
-    QSqlQuery *query = prepareQuery("update {prefix}_user_analytics set kick_count = kick_count + 1 where id = :id_player");
-    query->bindValue(":id_player", playerID);
-    execSqlQuery(query);
+    if (stat == "kick"){
+        QSqlQuery *query = prepareQuery("update {prefix}_user_analytics set kick_count = kick_count + 1 where id = :id_player");
+        query->bindValue(":id_player", playerID);
+        execSqlQuery(query);
+    }
+    
 }
 
 bool Servatrice_DatabaseInterface::userSessionExists(const QString &userName)

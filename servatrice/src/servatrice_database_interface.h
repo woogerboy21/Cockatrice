@@ -66,7 +66,7 @@ public:
     void clearSessionTables();
     void lockSessionTables();
     void unlockSessionTables();
-    void increaseKickStat(const int playerID);
+    void increasePlayerStat(const int &playerID, const QString &stat);
     bool userSessionExists(const QString &userName);
     bool usernameIsValid(const QString &user, QString & error);
     bool checkUserIsBanned(const QString &ipAddress, const QString &userName, const QString &clientId, QString &banReason, int &banSecondsRemaining);
