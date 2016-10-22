@@ -34,6 +34,7 @@ public:
     virtual void clearSessionTables() { }
     virtual void lockSessionTables() { }
     virtual void unlockSessionTables() { }
+    virtual void increaseKickStat(const int  /* playerID */) { }
     virtual bool userSessionExists(const QString & /* userName */) { return false; }
 
     virtual bool getRequireRegistration() { return false; }

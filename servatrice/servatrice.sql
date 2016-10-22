@@ -239,6 +239,7 @@ CREATE TABLE IF NOT EXISTS `cockatrice_user_analytics` (
   `id` int(7) unsigned zerofill NOT NULL,
   `client_ver` varchar(35) NOT NULL,
   `last_login` datetime NOT NULL,
+  `kick_count` smallint(6) NOT NULL DEFAULT 0;
   `notes` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`),
   FOREIGN KEY(`id`) REFERENCES `cockatrice_users`(`id`)  ON DELETE CASCADE ON UPDATE CASCADE

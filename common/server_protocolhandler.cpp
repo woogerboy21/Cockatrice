@@ -262,6 +262,8 @@ Response::ResponseCode Server_ProtocolHandler::processGameCommandContainer(const
             if (totalCount > maxCommandCountPerInterval)
                 return Response::RespChatFlood;
         }
+        if ((GameCommand::GameCommandType) getPbExtension(sc) == (GameCommand::KICK_FROM_GAME))
+            databaseInterface->increaseKickStat(userInfo->id());
 
         Response::ResponseCode resp = player->processGameCommand(sc, rc, ges);
 

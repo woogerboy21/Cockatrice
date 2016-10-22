@@ -581,6 +581,13 @@ void Servatrice_DatabaseInterface::unlockSessionTables()
     execSqlQuery(query);
 }
 
+void Servatrice_DatabaseInterface::increaseKickStat(const int playerID)
+{
+    QSqlQuery *query = prepareQuery("update {prefix}_user_analytics set kick_count = kick_count + 1 where id = :id_player");
+    query->bindValue(":id_player", playerID);
+    execSqlQuery(query);
+}
+
 bool Servatrice_DatabaseInterface::userSessionExists(const QString &userName)
 {
     // Call only after lockSessionTables().

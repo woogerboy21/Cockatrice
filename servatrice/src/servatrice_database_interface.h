@@ -9,7 +9,7 @@
 #include "server.h"
 #include "server_database_interface.h"
 
-#define DATABASE_SCHEMA_VERSION 17
+#define DATABASE_SCHEMA_VERSION 19
 
 class Servatrice;
 
@@ -66,6 +66,7 @@ public:
     void clearSessionTables();
     void lockSessionTables();
     void unlockSessionTables();
+    void increaseKickStat(const int playerID);
     bool userSessionExists(const QString &userName);
     bool usernameIsValid(const QString &user, QString & error);
     bool checkUserIsBanned(const QString &ipAddress, const QString &userName, const QString &clientId, QString &banReason, int &banSecondsRemaining);
