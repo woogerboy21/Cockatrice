@@ -23,6 +23,12 @@ void Skynet::JudgementDay()
 
     if (createDatabaseTable()) // create memory table for use
         qDebug() << "Judgement day has arrived";
+
+	if (addUserToTable("testuser"))
+		qDebug() << "Added testuser to table";
+
+	if (deleteUserFromTable("testuser"))
+		qDebug() << "Deleted testuser from table";
 }
 
 bool Skynet::createDatabaseTable()
@@ -39,11 +45,10 @@ bool Skynet::createDatabaseTable()
 	QSqlDatabase skynetDB = QSqlDatabase::database();
     QSqlQuery query(
         "CREATE TABLE IF NOT EXISTS `cockatrice_user_behavior` ("
-        "`id` int(7) unsigned zerofill,"
 		"`name` varchar(35),"
         "`kicks` int(1) DEFAULT 0,"
 		"`badwords` int(1) DEFAULT 0,"
-        "PRIMARY KEY(`id`)) ENGINE = MEMORY;");
+        "PRIMARY KEY(`name`)) ENGINE = MEMORY;");
 
     if (query.exec())
         if (skynetDB.tables().contains("cockatrice_user_behavior"))
@@ -84,10 +89,10 @@ bool Skynet::dbReady()
 	skynetDB.open();
 	*/
 	QSqlDatabase skynetDB = QSqlDatabase::database();
-    if (skynetDB.tables().contains("cockatrice_user_behavior"))
-        return true;
+	if (skynetDB.tables().contains("cockatrice_user_behavior"))
+		return true;
 
-    return false;
+	return false;
 }
 
 void Skynet::initDatabase()
@@ -99,4 +104,39 @@ void Skynet::initDatabase()
 	skynetDB.setUserName(settingsCache->value("database/user").toString());
 	skynetDB.setPassword(settingsCache->value("database/password").toString());
 	skynetDB.open();
+}
+
+bool Skynet::addUserToTable(const QString &userName)
+{
+	if (!dbReady())
+		return false;
+
+	qDebug() << "Adding user to database behavior table: " << userName;
+	QSqlDatabase skynetDB = QSqlDatabase::database();
+	QSqlQuery query;
+	query.prepare("insert into cockatrice_user_behavior (name) values (:username);");
+	query.bindValue(":username", userName);
+	
+	if (query.exec())
+		return true;
+
+	return false;
+
+}
+
+bool Skynet::deleteUserFromTable(const QString &userName)
+{
+	if (!dbReady())
+		return false;
+
+	qDebug() << "Adding user to database behavior table: " << userName;
+	QSqlDatabase skynetDB = QSqlDatabase::database();
+	QSqlQuery query;
+	query.prepare("delete from cockatrice_user_behavior where name = :username");
+	query.bindValue(":username", userName);
+
+	if (query.exec())
+		return true;
+
+	return false;
 }
