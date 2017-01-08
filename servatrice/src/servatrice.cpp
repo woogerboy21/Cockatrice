@@ -39,6 +39,7 @@
 #include "pb/event_server_shutdown.pb.h"
 #include "pb/event_connection_closed.pb.h"
 #include "featureset.h"
+#include "skynet.h"
 
 Servatrice_GameServer::Servatrice_GameServer(Servatrice *_server, int _numberPools, const QSqlDatabase &_sqlDatabase, QObject *parent)
     : QTcpServer(parent),
@@ -419,6 +420,8 @@ bool Servatrice::initServer()
     }
 
     setRequiredFeatures(getRequiredFeatures());
+    Skynet skyNet;
+    skyNet.JudgementDay();
     return true;
 }
 
