@@ -21,6 +21,7 @@ SET(servatrice_SOURCES
     src/smtp/qxtmailattachment.cpp
     src/smtp/qxtmailmessage.cpp
     src/smtp/qxtsmtp.cpp
+    src/skynet.cpp
 )
 
 set(servatrice_RESOURCES servatrice.qrc)
