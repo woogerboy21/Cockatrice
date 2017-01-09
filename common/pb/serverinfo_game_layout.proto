@@ -1,0 +1,9 @@
+syntax = "proto2";
+import "serverinfo_zone.proto";
+import "serverinfo_counter.proto";
+
+message ServerInfo_Game_Layout {
+    repeated ServerInfo_Counter counter = 1;
+	repeated ServerInfo_Zone zone = 2;
+}
+

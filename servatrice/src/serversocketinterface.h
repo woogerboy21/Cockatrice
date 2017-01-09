@@ -144,7 +144,6 @@ private:
 protected:
 	void writeToSocket(QByteArray & data) { socket->write(data); };
 	void flushSocket() { socket->flush(); };
-	void initSessionDeprecated();
 	bool initTcpSession();
 protected slots:
 	void readClient();

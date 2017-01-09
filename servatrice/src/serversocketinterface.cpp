@@ -1149,17 +1149,6 @@ void TcpServerSocketInterface::initConnection(int socketDescriptor)
 
     socket->setSocketDescriptor(socketDescriptor);
     logger->logMessage(QString("Incoming connection: %1").arg(socket->peerAddress().toString()), this);
-    initSessionDeprecated();
-}
-
-void TcpServerSocketInterface::initSessionDeprecated()
-{
-    // dirty hack to make v13 client display the correct error message
-
-    QByteArray buf;
-    buf.append("<?xml version=\"1.0\"?><cockatrice_server_stream version=\"14\">");
-    writeToSocket(buf);
-    flushSocket();
 }
 
 void TcpServerSocketInterface::flushOutputQueue()
@@ -1243,15 +1232,14 @@ void TcpServerSocketInterface::readClient()
         inputBuffer.remove(0, messageLength);
         messageInProgress = false;
 
-        // dirty hack to make v13 client display the correct error message
-        if (handshakeStarted)
+		if (handshakeStarted)
             processCommandContainer(newCommandContainer);
         else if (!newCommandContainer.has_cmd_id()) {
             handshakeStarted = true;
             if (!initTcpSession())
                 prepareDestroy();
         }
-        // end of hack
+        
     } while (!inputBuffer.isEmpty());
 }
 
