@@ -18,76 +18,81 @@ void Skynet::JudgementDay()
 {
 	initDatabase(); // create initial db connection
 
-    if (dbReady())  // check if db table exists and remove it to prepare for current use
-        deleteDatabaseTable();
+    if (doesTableExist(prepareTableName("{prefix}_user_behavior")) ) // check if db table exists and remove it to prepare for current use
+		deleteBehaviorDatabaseTable();
 
-    if (createDatabaseTable()) // create memory table for use
+   if (createBehaviorDatabaseTable()) // create memory table for use
         qDebug() << "Judgement day has arrived";
 }
 
-bool Skynet::createDatabaseTable()
+bool Skynet::addUserToBehaviorTable(const QString &user)
 {
-	qDebug() << "Creating required behavior table";
-	/*
-    QSqlDatabase skynetDB = QSqlDatabase::addDatabase("QMYSQL");
-    skynetDB.setHostName(settingsCache->value("database/hostname").toString());
-    skynetDB.setDatabaseName(settingsCache->value("database/database").toString());
-    skynetDB.setUserName(settingsCache->value("database/user").toString());
-    skynetDB.setPassword(settingsCache->value("database/password").toString());
-    skynetDB.open();
-	*/
+	qDebug() << "Adding user " << user << " to behavior table";
+	QSqlQuery query;
+	QSqlDatabase skynetDB = QSqlDatabase::database();
+	query.prepare("insert into cockatrice_user_behavior (name) values (:user_name)");
+	query.bindValue(":user_name", user);
+
+	if (query.exec())
+		return true;
+	return false;
+}
+
+bool Skynet::createBehaviorDatabaseTable()
+{
+	qDebug() << "Creating behavior database table";
 	QSqlDatabase skynetDB = QSqlDatabase::database();
     QSqlQuery query(
         "CREATE TABLE IF NOT EXISTS `cockatrice_user_behavior` ("
-        "`id` int(7) unsigned zerofill,"
+		"`id` int(7) unsigned zerofill NOT NULL auto_increment,"
 		"`name` varchar(35),"
         "`kicks` int(1) DEFAULT 0,"
 		"`badwords` int(1) DEFAULT 0,"
         "PRIMARY KEY(`id`)) ENGINE = MEMORY;");
-
-    if (query.exec())
-        if (skynetDB.tables().contains("cockatrice_user_behavior"))
-            return true;
-
-    return false;
-}
-
-bool Skynet::deleteDatabaseTable()
-{
-	qDebug() << "Removing existing behavior table";
-	/*
-    QSqlDatabase skynetDB = QSqlDatabase::addDatabase("QMYSQL");
-    skynetDB.setHostName(settingsCache->value("database/hostname").toString());
-    skynetDB.setDatabaseName(settingsCache->value("database/database").toString());
-    skynetDB.setUserName(settingsCache->value("database/user").toString());
-    skynetDB.setPassword(settingsCache->value("database/password").toString());
-    skynetDB.open();
-	*/
-	QSqlDatabase skynetDB = QSqlDatabase::database();
-    QSqlQuery query("drop table cockatrice_user_behavior;");
-    if (query.exec())
-        if (!skynetDB.tables().contains("cockatrice_user_behavior"))
-            return true;
+	
+	if (query.exec())
+		return true;
 
     return false;
 }
 
-bool Skynet::dbReady()
+bool Skynet::deleteBehaviorDatabaseTable()
 {
-	qDebug() << "Checking if DB contains required table(s)";
-	/* 
-	QSqlDatabase skynetDB = QSqlDatabase::addDatabase("QMYSQL");
-    skynetDB.setHostName(settingsCache->value("database/hostname").toString());
-    skynetDB.setDatabaseName(settingsCache->value("database/database").toString());
-    skynetDB.setUserName(settingsCache->value("database/user").toString());
-    skynetDB.setPassword(settingsCache->value("database/password").toString());
-	skynetDB.open();
-	*/
+	qDebug() << "Removing behavior database table";
 	QSqlDatabase skynetDB = QSqlDatabase::database();
-    if (skynetDB.tables().contains("cockatrice_user_behavior"))
+	QSqlQuery *query = prepareQuery("drop table {prefix}_user_behavior");
+
+	if (query->exec())
+		return true;
+
+    return false;
+}
+
+bool Skynet::doesTableExist(const QString &table)
+{
+	qDebug() << "Checking if table " << table << " exists";
+	QSqlDatabase skynetDB = QSqlDatabase::database();
+    if (skynetDB.tables().contains(table))
         return true;
 
     return false;
+}
+
+QSqlQuery * Skynet::prepareQuery(const QString &queryText)
+{
+	QString prefixedQueryText = queryText;
+	QSqlDatabase skynetDB = QSqlDatabase::database();
+	prefixedQueryText.replace("{prefix}", settingsCache->value("database/prefix").toString());
+	QSqlQuery * query = new QSqlQuery(skynetDB);
+	query->prepare(prefixedQueryText);
+	return query;
+}
+
+QString Skynet::prepareTableName(const QString &table)
+{
+	QString results = table;
+	results.replace("{prefix}", settingsCache->value("database/prefix").toString());
+	return results;
 }
 
 void Skynet::initDatabase()
