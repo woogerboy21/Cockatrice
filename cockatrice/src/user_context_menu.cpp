@@ -228,6 +228,15 @@ void UserContextMenu::adjustMod_processUserResponse(const Response &resp, const 
     }
 }
 
+void UserContextMenu::reportUser_processResponse(const Response &resp)
+{
+	if (resp.response_code() == Response::RespOk) {
+		QMessageBox::information(static_cast<QWidget *>(parent()), tr("Success"), tr("Successfully reported problematic user."));
+	} else {
+		QMessageBox::information(static_cast<QWidget *>(parent()), tr("Failed"), tr("Failed to report problematic user, please contact the moderation team for further assistance."));
+	}
+}
+
 void UserContextMenu::banUser_dialogFinished()
 {
     BanDialog *dlg = static_cast<BanDialog *>(sender());
@@ -400,7 +409,9 @@ void UserContextMenu::showContextMenu(const QPoint &pos, const QString &userName
 		Command_ReportUser cmd;
 		cmd.set_user(userName.toStdString());
 		cmd.set_reason("Abusive Language");
-		client->sendCommand(client->prepareSessionCommand(cmd));
+		PendingCommand *pend = client->prepareSessionCommand(cmd);
+		connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(reportUser_processResponse(Response)));
+		client->sendCommand(pend);
     }
 
     delete menu;

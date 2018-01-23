@@ -39,6 +39,7 @@ private slots:
     void warnUser_processUserInfoResponse(const Response &resp);
     void banUserHistory_processResponse(const Response &resp);
     void warnUserHistory_processResponse(const Response &resp);
+	void reportUser_processResponse(const Response &resp);
     void adjustMod_processUserResponse(const Response &resp, const CommandContainer &commandContainer);
     void banUser_dialogFinished();
     void warnUser_dialogFinished();
