@@ -157,7 +157,8 @@ Response::ResponseCode AbstractServerSocketInterface::processExtendedSessionComm
         case SessionCommand::ACCOUNT_EDIT: return cmdAccountEdit(cmd.GetExtension(Command_AccountEdit::ext), rc);
         case SessionCommand::ACCOUNT_IMAGE: return cmdAccountImage(cmd.GetExtension(Command_AccountImage::ext), rc);
         case SessionCommand::ACCOUNT_PASSWORD: return cmdAccountPassword(cmd.GetExtension(Command_AccountPassword::ext), rc);
-        default: return Response::RespFunctionNotAllowed;
+		case SessionCommand::REPORT_USER: return cmdReportUser(cmd.GetExtension(Command_ReportUser::ext), rc);
+		default: return Response::RespFunctionNotAllowed;
     }
 }
 
@@ -1021,6 +1022,12 @@ bool AbstractServerSocketInterface::tooManyRegistrationAttempts(const QString &i
     // TODO: implement
         Q_UNUSED(ipAddress);
     return false;
+}
+
+Response::ResponseCode AbstractServerSocketInterface::cmdReportUser(const Command_ReportUser &cmd, ResponseContainer & /*rc*/)
+{
+	qDebug() << "OH POOP WE HAVE SOME ONE BEING BAD (" << QString::fromStdString(cmd.user()) << ") DOING (" << QString::fromStdString(cmd.reason()) << ")";
+	return Response::RespOk;
 }
 
 Response::ResponseCode AbstractServerSocketInterface::cmdActivateAccount(const Command_Activate &cmd, ResponseContainer & /*rc*/)
