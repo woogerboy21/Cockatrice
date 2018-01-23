@@ -5,6 +5,7 @@ message RoomCommand {
         ROOM_SAY = 1001;
         CREATE_GAME = 1002;
         JOIN_GAME = 1003;
+		REPORT_USER = 1004;
     }
     extensions 100 to max;
 }
@@ -46,4 +47,12 @@ message Command_JoinGame {
     optional string password = 2;
     optional bool spectator = 3;
     optional bool override_restrictions = 4;
+}
+
+message Command_ReportUser {
+	extend RoomCommand {
+		optional Command_ReportUser ext = 1004;
+	}
+	optional string user = 1;
+	optional string reason = 2;
 }
