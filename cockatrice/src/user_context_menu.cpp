@@ -44,6 +44,7 @@ UserContextMenu::UserContextMenu(const TabSupervisor *_tabSupervisor, QWidget *p
     aBanHistory = new QAction(QString(), this);
     aPromoteToMod = new QAction(QString(), this);
     aDemoteFromMod = new QAction(QString(), this);
+	aReportUser = new QAction(QString(), this);
 
     retranslateUi();
 }
@@ -64,6 +65,7 @@ void UserContextMenu::retranslateUi()
     aBanHistory->setText(tr("View user's &ban history"));
     aPromoteToMod->setText(tr("&Promote user to moderator"));
     aDemoteFromMod->setText(tr("Dem&ote user from moderator"));
+	aReportUser->setText(tr("Report problem user"));
 }
 
 void UserContextMenu::gamesOfUserReceived(const Response &resp, const CommandContainer &commandContainer)
@@ -298,6 +300,8 @@ void UserContextMenu::showContextMenu(const QPoint &pos, const QString &userName
             menu->addAction(aPromoteToMod);
         }
     }
+	menu->addAction(aReportUser);
+
     bool anotherUser = userName != tabSupervisor->getOwnUsername();
     aDetails->setEnabled(true);
     aChat->setEnabled(anotherUser && online);
@@ -313,6 +317,7 @@ void UserContextMenu::showContextMenu(const QPoint &pos, const QString &userName
     aBanHistory->setEnabled(anotherUser);
     aPromoteToMod->setEnabled(anotherUser);
     aDemoteFromMod->setEnabled(anotherUser);
+	aReportUser->setEnabled(true);
 
     QAction *actionClicked = menu->exec(pos);
     if (actionClicked == aDetails) {
@@ -385,12 +390,17 @@ void UserContextMenu::showContextMenu(const QPoint &pos, const QString &userName
         PendingCommand *pend = client->prepareSessionCommand(cmd);
         connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(warnUser_processUserInfoResponse(Response)));
         client->sendCommand(pend);
-    } else if (actionClicked == aWarnHistory) {
-        Command_GetWarnHistory cmd;
-        cmd.set_user_name(userName.toStdString());
-        PendingCommand *pend = client->prepareModeratorCommand(cmd);
-        connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(warnUserHistory_processResponse(Response)));
-        client->sendCommand(pend);
+	} else if (actionClicked == aWarnHistory) {
+		Command_GetWarnHistory cmd;
+		cmd.set_user_name(userName.toStdString());
+		PendingCommand *pend = client->prepareModeratorCommand(cmd);
+		connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(warnUserHistory_processResponse(Response)));
+		client->sendCommand(pend);
+	} else if (actionClicked == aReportUser) {
+		Command_ReportUser cmd;
+		cmd.set_user(userName.toStdString());
+		cmd.set_reason("Abusive Language");
+		client->sendCommand(client->prepareSessionCommand(cmd));
     }
 
     delete menu;
