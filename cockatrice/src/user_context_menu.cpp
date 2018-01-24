@@ -24,6 +24,7 @@
 #include "pb/response_ban_history.pb.h"
 #include "pb/response_warn_history.pb.h"
 #include "pb/response_warn_list.pb.h"
+#include "pb/response_report_list.pb.h"
 
 UserContextMenu::UserContextMenu(const TabSupervisor *_tabSupervisor, QWidget *parent, TabGame *_game)
     : QObject(parent), client(_tabSupervisor->getClient()), tabSupervisor(_tabSupervisor), game(_game)
@@ -128,6 +129,25 @@ void UserContextMenu::warnUser_processGetWarningsListResponse(const Response &r)
     dlg->show();
 }
 
+void UserContextMenu::reportUser_processGetReportsListResponse(const Response &r)
+{
+	const Response_ReportList &response = r.GetExtension(Response_ReportList::ext);
+
+	QString user = QString::fromStdString(response.user_name()).simplified();
+	QString clientid = QString::fromStdString(response.user_clientid()).simplified();
+
+	// The dialog needs to be non-modal in order to not block the event queue of the client.
+	ReportUserDialog *dlg = new ReportUserDialog(user, "", static_cast<QWidget *>(parent()));
+	connect(dlg, SIGNAL(accepted()), this, SLOT(reportUser_dialogFinished()));
+
+	if (response.reportoption_size() > 0) {
+		for (int i = 0; i < response.reportoption_size(); ++i) {
+			dlg->addReasonOption(QString::fromStdString(response.reportoption(i)).simplified());
+		}
+	}
+	dlg->show();
+}
+
 void UserContextMenu::warnUser_processUserInfoResponse(const Response &resp)
 {
     const Response_GetUserInfo &response = resp.GetExtension(Response_GetUserInfo::ext);
@@ -139,6 +159,19 @@ void UserContextMenu::warnUser_processUserInfoResponse(const Response &resp)
     PendingCommand *pend = client->prepareModeratorCommand(cmd);
     connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(warnUser_processGetWarningsListResponse(Response)));
     client->sendCommand(pend);
+
+}
+
+void UserContextMenu::reportUser_processUserInfoResponse(const Response &resp)
+{
+	const Response_GetUserInfo &response = resp.GetExtension(Response_GetUserInfo::ext);
+	ServerInfo_User userInfo = response.user_info();
+
+	Command_GetReportList cmd;
+	cmd.set_user(userInfo.name());
+	PendingCommand *pend = client->prepareSessionCommand(cmd);
+	connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(reportUser_processGetReportsListResponse(Response)));
+	client->sendCommand(pend);
 
 }
 
@@ -267,6 +300,23 @@ void UserContextMenu::warnUser_dialogFinished()
     client->sendCommand(client->prepareModeratorCommand(cmd));
 
 }
+
+void UserContextMenu::reportUser_dialogFinished()
+{
+	ReportUserDialog *dlg = static_cast<ReportUserDialog *>(sender());
+
+	if (dlg->getName().isEmpty() || tabSupervisor->getOwnUsername().simplified().isEmpty())
+		return;
+
+	Command_ReportUser cmd;
+	cmd.set_user(dlg->getName().toStdString());
+	cmd.set_reason(dlg->getReason().toStdString());
+	cmd.set_gameid(dlg->getGameID().toStdString());
+
+	client->sendCommand(client->prepareSessionCommand(cmd));
+
+}
+
 
 void UserContextMenu::showContextMenu(const QPoint &pos, const QString &userName, UserLevelFlags userLevel, bool online, int playerId)
 {
@@ -406,11 +456,10 @@ void UserContextMenu::showContextMenu(const QPoint &pos, const QString &userName
 		connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(warnUserHistory_processResponse(Response)));
 		client->sendCommand(pend);
 	} else if (actionClicked == aReportUser) {
-		Command_ReportUser cmd;
-		cmd.set_user(userName.toStdString());
-		cmd.set_reason("Abusive Language");
+		Command_GetUserInfo cmd;
+		cmd.set_user_name(userName.toStdString());
 		PendingCommand *pend = client->prepareSessionCommand(cmd);
-		connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(reportUser_processResponse(Response)));
+		connect(pend, SIGNAL(finished(Response, CommandContainer, QVariant)), this, SLOT(reportUser_processUserInfoResponse(Response)));
 		client->sendCommand(pend);
     }
 

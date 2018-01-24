@@ -61,6 +61,22 @@ public:
     void addWarningOption(const QString warning);
 };
 
+class ReportUserDialog : public QDialog {
+	Q_OBJECT
+private:
+	QLabel *nameLabel, *reasonLabel, *gameIDLabel;
+	QComboBox *reportOption;
+	QLineEdit *idOfGame, *usersName;
+private slots:
+	void okClicked();
+public:
+	ReportUserDialog(const QString userName, const QString gameID, QWidget *parent = 0);
+	QString getName() const;
+	QString getReason() const;
+	QString getGameID() const;
+	void addReasonOption(const QString reason);
+};
+
 class UserListItemDelegate : public QStyledItemDelegate {
 public:
     UserListItemDelegate(QObject *const parent);

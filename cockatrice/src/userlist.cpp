@@ -145,6 +145,77 @@ WarningDialog::WarningDialog(const QString userName, const QString clientID, QWi
     setWindowTitle(tr("Warn user for misconduct"));
 }
 
+ReportUserDialog::ReportUserDialog(const QString userName, const QString gameID, QWidget *parent)
+	: QDialog(parent)
+{
+	setAttribute(Qt::WA_DeleteOnClose);
+	nameLabel = new QLabel(tr("User to report:"));
+	reasonLabel = new QLabel(tr("Reason:"));
+	gameIDLabel = new QLabel(tr("GameID:"));
+	usersName = new QLineEdit(userName);
+	idOfGame = new QLineEdit(gameID);
+	reportOption = new QComboBox();
+	reportOption->addItem("");
+
+	QPushButton *okButton = new QPushButton(tr("&OK"));
+	okButton->setAutoDefault(true);
+	connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+	QPushButton *cancelButton = new QPushButton(tr("&Cancel"));
+	connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+
+	QHBoxLayout *buttonLayout = new QHBoxLayout;
+	buttonLayout->addStretch();
+	buttonLayout->addWidget(okButton);
+	buttonLayout->addWidget(cancelButton);
+
+	QVBoxLayout *vbox = new QVBoxLayout;
+	vbox->addWidget(nameLabel);
+	vbox->addWidget(usersName);
+	vbox->addWidget(reasonLabel);
+	vbox->addWidget(reportOption);
+	vbox->addWidget(gameIDLabel);
+	vbox->addWidget(idOfGame);
+	vbox->addLayout(buttonLayout);
+	setLayout(vbox);
+	setWindowTitle(tr("Report user for misconduct"));
+}
+
+QString ReportUserDialog::getName() const
+{
+	return usersName->text().simplified();
+}
+
+QString ReportUserDialog::getReason() const
+{
+	return reportOption->currentText().simplified();
+}
+
+QString ReportUserDialog::getGameID() const
+{
+	return idOfGame->text().simplified();
+}
+
+void ReportUserDialog::addReasonOption(const QString reason)
+{
+	reportOption->addItem(reason);
+}
+
+void ReportUserDialog::okClicked()
+{
+	if (usersName->text().simplified().isEmpty()) {
+		QMessageBox::critical(this, tr("Error"), tr("User name to send a report on can not be blank, please specify a user to report."));
+		return;
+	}
+
+	if (reportOption->currentText().simplified().isEmpty()) {
+		QMessageBox::critical(this, tr("Error"), tr("Report reason to use can not be blank, please select a valid reason to send."));
+		return;
+	}
+
+	accept();
+}
+
+
 void WarningDialog::okClicked()
 {
     if (nameWarning->text().simplified().isEmpty()) {

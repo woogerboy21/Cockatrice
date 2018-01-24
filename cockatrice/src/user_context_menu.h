@@ -36,13 +36,16 @@ signals:
 private slots:
     void banUser_processUserInfoResponse(const Response &resp);
     void warnUser_processGetWarningsListResponse(const Response &r);
+	void reportUser_processGetReportsListResponse(const Response &r);
     void warnUser_processUserInfoResponse(const Response &resp);
+	void reportUser_processUserInfoResponse(const Response &resp);
     void banUserHistory_processResponse(const Response &resp);
     void warnUserHistory_processResponse(const Response &resp);
 	void reportUser_processResponse(const Response &resp);
     void adjustMod_processUserResponse(const Response &resp, const CommandContainer &commandContainer);
     void banUser_dialogFinished();
     void warnUser_dialogFinished();
+	void reportUser_dialogFinished();
     void gamesOfUserReceived(const Response &resp, const CommandContainer &commandContainer);
 public:
     UserContextMenu(const TabSupervisor *_tabSupervisor, QWidget *_parent, TabGame *_game = 0);
