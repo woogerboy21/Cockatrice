@@ -132,12 +132,10 @@ void UserContextMenu::warnUser_processGetWarningsListResponse(const Response &r)
 void UserContextMenu::reportUser_processGetReportsListResponse(const Response &r)
 {
 	const Response_ReportList &response = r.GetExtension(Response_ReportList::ext);
-
-	QString user = QString::fromStdString(response.user_name()).simplified();
-	QString clientid = QString::fromStdString(response.user_clientid()).simplified();
+	QString user = QString::fromStdString(response.user()).simplified();
 
 	// The dialog needs to be non-modal in order to not block the event queue of the client.
-	ReportUserDialog *dlg = new ReportUserDialog(user, "", static_cast<QWidget *>(parent()));
+	ReportUserDialog *dlg = new ReportUserDialog(user,"", static_cast<QWidget *>(parent()));
 	connect(dlg, SIGNAL(accepted()), this, SLOT(reportUser_dialogFinished()));
 
 	if (response.reportoption_size() > 0) {

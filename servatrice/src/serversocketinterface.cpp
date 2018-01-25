@@ -61,6 +61,7 @@
 #include "pb/response_replay_download.pb.h"
 #include "pb/response_warn_history.pb.h"
 #include "pb/response_warn_list.pb.h"
+#include "pb/response_report_list.pb.h"
 #include "pb/response_viewlog_history.pb.h"
 #include "pb/response_forgotpasswordrequest.pb.h"
 #include "pb/serverinfo_replay.pb.h"
@@ -158,6 +159,7 @@ Response::ResponseCode AbstractServerSocketInterface::processExtendedSessionComm
         case SessionCommand::ACCOUNT_IMAGE: return cmdAccountImage(cmd.GetExtension(Command_AccountImage::ext), rc);
         case SessionCommand::ACCOUNT_PASSWORD: return cmdAccountPassword(cmd.GetExtension(Command_AccountPassword::ext), rc);
 		case SessionCommand::REPORT_USER: return cmdReportUser(cmd.GetExtension(Command_ReportUser::ext), rc);
+		case SessionCommand::REPORT_LIST: return cmdGetReportList(cmd.GetExtension(Command_GetReportList::ext), rc);
 		default: return Response::RespFunctionNotAllowed;
     }
 }
@@ -746,6 +748,20 @@ Response::ResponseCode AbstractServerSocketInterface::cmdGetWarnHistory(const Co
         re->add_warn_list()->CopyFrom(warnIterator.next());
     rc.setResponseExtension(re);
     return Response::RespOk;
+}
+
+Response::ResponseCode AbstractServerSocketInterface::cmdGetReportList(const Command_GetReportList &cmd, ResponseContainer &rc)
+{
+	Response_ReportList *re = new Response_ReportList;
+
+	QString officialReports = settingsCache->value("server/officialreports").toString();
+	QStringList reportsList = officialReports.split(",", QString::SkipEmptyParts);
+	foreach(QString report, reportsList) {
+		re->add_reportoption(report.toStdString());
+	}
+	re->set_user(cmd.user());
+	rc.setResponseExtension(re);
+	return Response::RespOk;
 }
 
 Response::ResponseCode AbstractServerSocketInterface::cmdWarnUser(const Command_WarnUser &cmd, ResponseContainer & /*rc*/)

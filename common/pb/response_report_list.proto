@@ -6,6 +6,5 @@ message Response_ReportList{
         optional Response_ReportList ext = 1017;
     }
     repeated string reportoption = 1;
-    optional string user_name = 2;
-    optional string user_clientid = 3;
+	optional string user = 2;
 }
